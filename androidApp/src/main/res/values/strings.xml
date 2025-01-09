@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    #BUTTON AND TITLES
+    <string name="title_main_page">RELOJES</string>
+    <string name="subtitle_main_page">PARA JUEGOS DE MESA</string>
+    <string name="start_game">Comenzar partida</string>
+    <string name="load_previous_game">Jugar partida guarda</string>
+
+    #NAVIGATION IN TOOLBAR
+    <string name="main_page_appbar_title">Home</string>
+    <string name="select_players_title">Cargar jugadores</string>
+    <string name="load_saved_game_title">Cargar partida guardada</string>
+    <string name="choose_timer_title">Cargar tiempo</string>
+    <string name="game_page_title">Juego</string>
+
+    <string name="back_arrow_description">Flecha atrás</string>
+    <string name="button_share_description">Botón de compartir</string>
+    <string name="image_generic_description">Imagen con zoom</string>
+    <string name="button_info">Botón de información</string>
+
+
+    <string name="button_info_text">En esta sección puedes cargar y jugar las partidas ya empezadas y guardadas con todos sos jugadores.</string>
+    <string name="button_share_text">Te invito a descargar esta aplicación para usar varios relojes en juegos de mesa.\n
+    Tiene mucho contenido interesante! En la Play Store aparece como Relojes Multijugador. El link es: \n
+    https://play.google.com/store/apps/details?id=com.pernasa.multiplayerClocks</string>
+
+</resources>
