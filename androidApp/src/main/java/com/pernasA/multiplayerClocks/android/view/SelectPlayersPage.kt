@@ -19,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.sharp.ArrowBack
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,17 +45,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pernasA.multiplayerClocks.android.models.Player
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TIME_ALL_GAME
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TIME_EACH_MOVE
+import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 
 import com.pernasA.multiplayerclock.android.R
 
 @Composable
 fun SelectPlayersPage(
-    chooseTimerOnClick: (List<Player>, Int) -> Unit,
+    goToChooseTimerOnClick: () -> Unit,
+    sharedViewModel: SharedViewModel,
 ) {
     var playerCount by remember { mutableIntStateOf(1) }
     val playerNames = remember { mutableStateListOf(*Array(8) { "" }) }
@@ -108,8 +109,8 @@ fun SelectPlayersPage(
                 IconButton(onClick = { if (playerCount > 1) playerCount-- }) {
                     Icon(
                         modifier = Modifier.size(40.dp),
-                        imageVector = Icons.Sharp.ArrowBack,
-                        contentDescription = stringResource(R.string.back_arrow_description),
+                        imageVector = Icons.Filled.Remove,
+                        contentDescription = stringResource(R.string.button_decrease_description),
                     )
                 }
 
@@ -124,7 +125,7 @@ fun SelectPlayersPage(
                     Icon(
                         modifier = Modifier.size(40.dp),
                         imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(R.string.back_arrow_description)
+                        contentDescription = stringResource(R.string.button_increase_description)
                     )
                 }
             }
@@ -171,12 +172,14 @@ fun SelectPlayersPage(
                         playersList.add(Player(name, color))
                     }
                     println(playersList)
+                    sharedViewModel.setPlayersList(playersList)
+                    sharedViewModel.setTypeOfTimer(selectedTimeMode)
 
-                    chooseTimerOnClick(playersList, selectedTimeMode)
+                    goToChooseTimerOnClick()
                 },
                 enabled = selectedTimeMode != -1 && playerNames.take(playerCount).all { it.isNotBlank() }
             ) {
-                Text("CARGAR TIEMPO")
+                Text("CONTINUAR")
             }
         }
     }
@@ -235,14 +238,11 @@ fun PlayerRow(
                 availableColors.forEach { color ->
                     DropdownMenuItem(
                         onClick = {
-                            // Liberar el color previamente seleccionado
                             if (playerColor != Color.Transparent) {
                                 availableColors.add(playerColor)
                             }
-                            // Asignar el nuevo color
                             onColorChange(color)
                             expanded = false
-                            // Remover el nuevo color de la lista de colores disponibles
                             availableColors.remove(color)
                         },
                         leadingIcon = {
@@ -295,10 +295,3 @@ fun TimeModeCard(
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun SelectPlayersPagePreview() {
-//    SelectPlayersPage { { }
-//    }
-//}

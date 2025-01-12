@@ -18,6 +18,8 @@
     <string name="button_share_description">Botón de compartir</string>
     <string name="image_generic_description">Imagen con zoom</string>
     <string name="button_info">Botón de información</string>
+    <string name="button_decrease_description">Botón de decrementar</string>
+    <string name="button_increase_description">Botón de incrementar</string>
 
 
     <string name="button_info_text">En esta sección puedes cargar y jugar las partidas ya empezadas y guardadas con todos sos jugadores.</string>

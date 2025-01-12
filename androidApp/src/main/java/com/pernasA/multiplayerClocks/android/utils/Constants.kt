@@ -9,7 +9,7 @@ class Constants {
         val MEDIUM_TEXT_SIZE = 17.sp
         val SUBTITLE_TEXT_SIZE = 15.sp
         val BUTTON_HOME_TEXT_SIZE = 24.sp
-        val TIME_EACH_MOVE = 0
-        val TIME_ALL_GAME = 1
+        const val TIME_EACH_MOVE = 0
+        const val TIME_ALL_GAME = 1
     }
 }

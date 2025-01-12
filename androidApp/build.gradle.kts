@@ -51,4 +51,6 @@ dependencies {
     implementation(libs.androidx.material3.android)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.gson)
+    implementation(libs.material.icons.extended)
+
 }

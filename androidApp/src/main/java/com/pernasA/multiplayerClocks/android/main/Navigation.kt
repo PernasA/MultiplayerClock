@@ -12,23 +12,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
-import com.google.gson.Gson
-import com.pernasA.multiplayerClocks.android.models.Player
 import com.pernasA.multiplayerClocks.android.view.ChooseTimerPage
 import com.pernasA.multiplayerClocks.android.view.GamePage
 
 import com.pernasA.multiplayerClocks.android.view.HomePage
 import com.pernasA.multiplayerClocks.android.view.LoadPreviousGamePage
 import com.pernasA.multiplayerClocks.android.view.SelectPlayersPage
+import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 import com.pernasA.multiplayerclock.android.R
 
 import kotlinx.coroutines.delay
@@ -48,6 +45,7 @@ fun Navigation(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = getCurrentScreen(backStackEntry?.destination?.route)
+    val sharedViewModel: SharedViewModel = viewModel()
 
     Scaffold(
         modifier = Modifier,
@@ -61,14 +59,17 @@ fun Navigation(
     ) { innerPadding ->
         CreateNavigationHost(
             navController,
-            innerPadding
+            innerPadding,
+            sharedViewModel
         )
     }
 }
+
 @Composable
 private fun CreateNavigationHost(
     navController: NavHostController,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    sharedViewModel: SharedViewModel
 ) {
     NavHost(
         navController = navController,
@@ -105,43 +106,28 @@ private fun CreateNavigationHost(
             val scope = rememberCoroutineScope()
             var isLoading by remember { mutableStateOf(false) }
             SelectPlayersPage(
-                chooseTimerOnClick = { playersList, selectedTimeMode ->
+                goToChooseTimerOnClick = {
                     scope.launch {
                         isLoading = true
                         delay(1000)
                         navController.navigate(
-                            "${NameOfScreen.ChooseTimerNav.name}/$playersList/$selectedTimeMode"
+                            NameOfScreen.ChooseTimerNav.name
                         )
                         isLoading = false
                     }
                 },
-//                playersList = listOf(), // Aquí se debe pasar tu lista de jugadores
-//                selectedTimeMode = 0 // Aquí puedes pasar el tiempo seleccionado
+                sharedViewModel
             )
         }
 
-        val gson = Gson()
         composable(
-            route = "${NameOfScreen.ChooseTimerNav.name}/{playersList}/{selectedTimeMode}",
-            arguments = listOf(
-                navArgument("playersList") { type = NavType.StringType },
-                navArgument("selectedTimeMode") { type = NavType.IntType }
-            )
-        ) { backStackEntry ->
-            val playersJson = backStackEntry.arguments?.getString("playersList") ?: "[]"
-            val selectedTimeMode = backStackEntry.arguments?.getInt("selectedTimeMode") ?: -1
-
-            val playersList: List<Player> = gson.fromJson(
-                playersJson,
-                object : TypeToken<List<Player>>() {}.type
-            )
-
+            route = NameOfScreen.ChooseTimerNav.name,
+        ) {
             ChooseTimerPage(
-                chooseTimerOnClick = {
+                goToGamePageOnClick = {
                     navController.navigate(NameOfScreen.GamePageNav.name)
                 },
-                playersList = playersList,
-                selectedTimeMode = selectedTimeMode
+                sharedViewModel
             )
         }
 
@@ -150,11 +136,14 @@ private fun CreateNavigationHost(
                 chooseTimerOnClick = { ->
                     navController.navigate(NameOfScreen.ChooseTimerNav.name)
                 },
+                sharedViewModel
             )
         }
 
         composable(route = NameOfScreen.GamePageNav.name) {
-            GamePage()
+            GamePage(
+                sharedViewModel
+            )
         }
     }
 }
@@ -167,7 +156,7 @@ fun getCurrentScreen(route: String?): NameOfScreen {
         route == NameOfScreen.SelectPlayersNav.name -> NameOfScreen.SelectPlayersNav
         route == NameOfScreen.LoadGameNav.name -> NameOfScreen.LoadGameNav
         route == NameOfScreen.GamePageNav.name -> NameOfScreen.GamePageNav
-        route == NameOfScreen.ChooseTimerNav.name -> NameOfScreen.GamePageNav
+        route == NameOfScreen.ChooseTimerNav.name -> NameOfScreen.ChooseTimerNav
         else -> NameOfScreen.StartNav
     }
 }
