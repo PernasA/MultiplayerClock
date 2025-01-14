@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -43,14 +45,15 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pernasA.multiplayerClocks.android.models.Player
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TIME_ALL_GAME
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TIME_EACH_MOVE
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
-
 import com.pernasA.multiplayerclock.android.R
 
 @Composable
@@ -58,28 +61,28 @@ fun SelectPlayersPage(
     goToChooseTimerOnClick: () -> Unit,
     sharedViewModel: SharedViewModel,
 ) {
-    var playerCount by remember { mutableIntStateOf(1) }
+    var playerCount by remember { mutableIntStateOf(2) }
     val playerNames = remember { mutableStateListOf(*Array(8) { "" }) }
     var selectedTimeMode by remember { mutableIntStateOf(-1) }
     val availableColors = remember {
         mutableStateListOf(
             Color(0xFFFF0000), // Rojo
-            Color(0xFFFFA500), // Naranja
-            Color(0xFFFFFF00), // Amarillo
             Color(0xFF00FF00), // Verde
+            Color(0xFFFFFF00), // Amarillo
             Color(0xFF00FFFF), // Cian
             Color(0xFF0000FF), // Azul
             Color(0xFF800080), // Morado
             Color(0xFFFF1493), // Rosa
+            Color(0xFFFFA500), // Naranja
             Color(0xFF8B4513), // Marrón
             Color(0xFFFFD700), // Dorado
             Color(0xFF40E0D0),  // Turquesa
             Color(0xFFE91E63), // Rosa brillante
             Color(0xFF673AB7), // Índigo
-            Color(0xFF00BCD4), // Cian brillante
             Color(0xFF009688), // Verde azulado
             Color(0xFFFF5722), // Naranja brillante
             Color(0xFF795548), // Marrón claro
+            Color(0xFF00BCD4), // Cian brillante
         )
     }
     val playerColors = remember {
@@ -106,7 +109,7 @@ fun SelectPlayersPage(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(bottom = 12.dp)
             ) {
-                IconButton(onClick = { if (playerCount > 1) playerCount-- }) {
+                IconButton(onClick = { if (playerCount > 2) playerCount-- }) {
                     Icon(
                         modifier = Modifier.size(40.dp),
                         imageVector = Icons.Filled.Remove,
@@ -202,14 +205,24 @@ fun PlayerRow(
             "${index + 1}",
             modifier = Modifier.width(30.dp)
         )
-
+        val keyboardController = LocalSoftwareKeyboardController.current
         TextField(
             value = playerName,
-            onValueChange = onNameChange,
+            onValueChange = { newName ->
+                onNameChange(newName.replaceFirstChar { it.uppercaseChar() })
+            },
             label = { Text("Nombre de jugador*") },
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 8.dp),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            )
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -262,7 +275,6 @@ fun PlayerRow(
                 }
             }
         }
-
     }
 }
 

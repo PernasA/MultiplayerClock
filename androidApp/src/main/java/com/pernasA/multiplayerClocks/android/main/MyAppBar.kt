@@ -24,7 +24,7 @@ fun MyAppBar(
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (currentScreen != NameOfScreen.StartNav) {
+    if (currentScreen != NameOfScreen.StartNav && currentScreen != NameOfScreen.GamePageNav) {
         TopAppBar(
             title = { Text(stringResource(currentScreen.title)) },
             colors = TopAppBarDefaults.mediumTopAppBarColors(

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.pernasA.multiplayerClocks.android.models.Player
 
-class SharedViewModel : ViewModel() {
+open class SharedViewModel : ViewModel() {
 
     private var _playersList by mutableStateOf<List<Player>>(emptyList())
     private var _typeOfTimer by mutableIntStateOf(-1)
@@ -18,7 +18,7 @@ class SharedViewModel : ViewModel() {
         _playersList = list
     }
 
-    fun getPlayersList(): List<Player> {
+    open fun getPlayersList(): List<Player> {
         return _playersList
     }
 
@@ -26,7 +26,7 @@ class SharedViewModel : ViewModel() {
         _typeOfTimer = type
     }
 
-    fun getTypeOfTimer(): Int {
+    open fun getTypeOfTimer(): Int {
         return _typeOfTimer
     }
 

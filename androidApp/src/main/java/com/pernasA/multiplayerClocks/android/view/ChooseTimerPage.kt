@@ -15,6 +15,7 @@ import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.BIG_TEXT_
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TIME_ALL_GAME
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TIME_EACH_MOVE
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
+import java.util.Locale
 
 @Composable
 fun ChooseTimerPage(
@@ -74,13 +75,13 @@ fun ChooseTimerPage(
                         val incrementSecondsTotal = incrementSeconds
 
                         when (typeOfTimer) {
-                            0 -> {
+                            TIME_ALL_GAME -> {
                                 playersList.forEach {
                                     it.totalTimeInSeconds = totalSeconds
                                     it.incrementTimeInSeconds = incrementSecondsTotal
                                 }
                             }
-                            1 -> {
+                            TIME_EACH_MOVE -> {
                                 playersList.forEach { it.timePerMoveInSeconds = totalSeconds }
                             }
                         }
@@ -172,10 +173,11 @@ fun CustomTimePicker(
                 },
                 range = 0..9
             )
-
         }
+
         Text(
             text = String.format(
+                Locale.US,
                 "Tiempo: %02d:%02d",
                 totalMinutes,
                 totalSeconds
@@ -233,6 +235,7 @@ fun CustomTimePickerIncrement(
         }
         Text(
             text = String.format(
+                Locale.US,
                 "Incremento: %02d segundos",
                 totalSeconds
             ),
