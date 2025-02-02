@@ -172,7 +172,9 @@ fun SelectPlayersPage(
                     for (i in playerNames.indices) {
                         val name = playerNames[i]
                         val color = playerColors.getOrNull(i) ?: Color.Transparent
-                        playersList.add(Player(name, color))
+                        if (name.isNotEmpty() && name.isNotBlank()) {
+                            playersList.add(Player(name, color))
+                        }
                     }
                     println(playersList)
                     sharedViewModel.setPlayersList(playersList)
@@ -206,10 +208,13 @@ fun PlayerRow(
             modifier = Modifier.width(30.dp)
         )
         val keyboardController = LocalSoftwareKeyboardController.current
+
         TextField(
             value = playerName,
             onValueChange = { newName ->
-                onNameChange(newName.replaceFirstChar { it.uppercaseChar() })
+                if (newName.length <= 10) {
+                    onNameChange(newName.replaceFirstChar { it.uppercaseChar() })
+                }
             },
             label = { Text("Nombre de jugador*") },
             modifier = Modifier
@@ -224,6 +229,7 @@ fun PlayerRow(
                 imeAction = ImeAction.Done
             )
         )
+
 
         Spacer(modifier = Modifier.width(8.dp))
 

@@ -67,26 +67,25 @@ fun ChooseTimerPage(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
+                val playersList = sharedViewModel.playersList.collectAsState()
                 Button(
                     onClick = {
-                        val playersList = sharedViewModel.getPlayersList().toMutableStateList()
                         val totalSeconds = selectedTimeMinutes * 60 + selectedTimeSeconds
                         val incrementSecondsTotal = incrementSeconds
 
                         when (typeOfTimer) {
                             TIME_ALL_GAME -> {
-                                playersList.forEach {
+                                playersList.value.forEach {
                                     it.totalTimeInSeconds = totalSeconds
                                     it.incrementTimeInSeconds = incrementSecondsTotal
                                 }
                             }
                             TIME_EACH_MOVE -> {
-                                playersList.forEach { it.timePerMoveInSeconds = totalSeconds }
+                                playersList.value.forEach { it.timePerMoveInSeconds = totalSeconds }
                             }
                         }
 
-                        sharedViewModel.setPlayersList(playersList)
+                        sharedViewModel.setPlayersList(playersList.value)
                         goToGamePageOnClick()
                     },
                     enabled = selectedTimeMinutes > 0 || selectedTimeSeconds > 0,
