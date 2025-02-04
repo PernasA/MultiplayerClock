@@ -4,7 +4,12 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,6 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.navigation.NavHostController
@@ -27,6 +35,7 @@ import com.pernasA.multiplayerClocks.android.view.LoadPreviousGamePage
 import com.pernasA.multiplayerClocks.android.view.SelectPlayersPage
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 import com.pernasA.multiplayerclock.android.R
+import kotlinx.coroutines.CoroutineScope
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,8 +55,24 @@ fun Navigation(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = getCurrentScreen(backStackEntry?.destination?.route)
     val sharedViewModel: SharedViewModel = viewModel()
+    sharedViewModel.setNavController(navController)
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    modifier = Modifier.padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    containerColor = Color(0xFF333333), // Color de fondo personalizado
+                    contentColor = Color.White,
+                    actionColor = Color.Yellow, // Color del botón de acción
+                )
+            }
+                       },
         modifier = Modifier,
         topBar = {
             MyAppBar(
@@ -60,7 +85,9 @@ fun Navigation(
         CreateNavigationHost(
             navController,
             innerPadding,
-            sharedViewModel
+            sharedViewModel,
+            snackbarHostState,
+            coroutineScope
         )
     }
 }
@@ -69,7 +96,9 @@ fun Navigation(
 private fun CreateNavigationHost(
     navController: NavHostController,
     innerPadding: PaddingValues,
-    sharedViewModel: SharedViewModel
+    sharedViewModel: SharedViewModel,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope
 ) {
     NavHost(
         navController = navController,
@@ -81,6 +110,7 @@ private fun CreateNavigationHost(
         composable(route = NameOfScreen.StartNav.name) {
             val scope = rememberCoroutineScope()
             var isLoading by remember { mutableStateOf(false) }
+            val localContext = LocalContext.current
             HomePage(
                 selectPlayersOnClick = {
                     scope.launch {
@@ -90,11 +120,24 @@ private fun CreateNavigationHost(
                         isLoading = false
                     }
                 },
+
                 loadGameOnClick = {
                     scope.launch {
                         isLoading = true
+                        val hasLoadedGame = sharedViewModel.loadGame(localContext)
                         delay(500)
-                        navController.navigate(NameOfScreen.LoadGameNav.name)
+                        if (hasLoadedGame) {
+                            navController.navigate(NameOfScreen.GamePageNav.name)
+                        } else {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "No tiene ningún juego guardado. Por favor inicie una nueva partida.",
+                                    actionLabel = "OK",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }
+
                         isLoading = false
                     }
                 },

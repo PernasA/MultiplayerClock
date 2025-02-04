@@ -77,11 +77,13 @@ fun ChooseTimerPage(
                             TIME_ALL_GAME -> {
                                 playersList.value.forEach {
                                     it.totalTimeInSeconds = totalSeconds
-                                    it.incrementTimeInSeconds = incrementSecondsTotal
                                 }
+                                sharedViewModel.setSelectedIncrementTime(incrementSecondsTotal)
+                                sharedViewModel.setTotalTimeGameGlobal(totalSeconds)
                             }
                             TIME_EACH_MOVE -> {
                                 playersList.value.forEach { it.timePerMoveInSeconds = totalSeconds }
+                                sharedViewModel.setTimePerMoveInSecondsGlobal(totalSeconds)
                             }
                         }
 

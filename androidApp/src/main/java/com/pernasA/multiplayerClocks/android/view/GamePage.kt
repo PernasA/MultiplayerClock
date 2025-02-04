@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,26 +15,39 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 import com.pernasA.multiplayerClocks.android.models.Player
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
@@ -69,8 +83,14 @@ fun GamePage(sharedViewModel: SharedViewModel) {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamePageToolbar(viewModel: SharedViewModel) {
+    val showSettingsDialog = remember { mutableStateOf(false) }
+    val isSoundEnabled = remember { mutableStateOf(true) }
+    val iconsSize = 40.dp
+    val isRunning by viewModel.isRunning.collectAsState()
+
     Column {
         Row(
             modifier = Modifier
@@ -79,8 +99,6 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val iconsSize = 40.dp
-            val isRunning by viewModel.isRunning.collectAsState()
             // Icono Pausa / Reanudar
             Box(
                 modifier = Modifier
@@ -90,7 +108,7 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isRunning) { Icons.Filled.Pause } else { Icons.Filled.PlayArrow },
+                    imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                     contentDescription = "Pausar/Reanudar",
                     modifier = Modifier.size(iconsSize)
                 )
@@ -105,7 +123,7 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
                     .fillMaxHeight()
                     .clickable {
                         viewModel.togglePause()
-                        //TODO: abrir modal con información
+                        showSettingsDialog.value = true
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -118,13 +136,83 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
         }
         HorizontalDivider(thickness = 3.dp, color = Color.Black)
     }
+
+    if (showSettingsDialog.value) {
+        ConfigurationModal(showSettingsDialog, viewModel, isSoundEnabled)
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ConfigurationModal(
+    showSettingsDialog: MutableState<Boolean>,
+    viewModel: SharedViewModel,
+    isSoundEnabled: MutableState<Boolean>
+) {
+    ModalBottomSheet(
+        onDismissRequest = { showSettingsDialog.value = false },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Botón Reiniciar timers
+            Button(
+                onClick = {
+                    viewModel.resetTimers()
+                    showSettingsDialog.value = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Reiniciar timers")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botón Guardar partida
+            val localContext = LocalContext.current
+            Button(
+                onClick = {
+                    viewModel.saveGame(localContext)
+                    showSettingsDialog.value = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Guardar partida")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    showSettingsDialog.value = false
+                    viewModel.goToMenuPage()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ir al menú")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            IconButton(onClick = { isSoundEnabled.value = !isSoundEnabled.value }) {
+                Icon(
+                    imageVector = if (isSoundEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,
+                    contentDescription = "Sonido",
+                    tint = if (isSoundEnabled.value) Color.Green else Color.Gray
+                )
+            }
+        }
+    }
 }
 
 
 @Preview(showBackground = true)
 @Composable
 fun PlayerCardPreview() {
-    // Datos de ejemplo para el Preview
     val examplePlayer = Player(
         name = "John Doe",
         color = Color.Blue,
