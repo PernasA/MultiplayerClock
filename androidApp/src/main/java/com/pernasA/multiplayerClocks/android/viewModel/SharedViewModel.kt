@@ -24,9 +24,11 @@ import kotlinx.coroutines.isActive
 
 open class SharedViewModel : ViewModel() {
     private lateinit var navController: NavHostController
+    private lateinit var soundsController: SoundsController
 
     private val _playersList = MutableStateFlow<List<Player>>(emptyList())
     val playersList: StateFlow<List<Player>> = _playersList.asStateFlow()
+    private var _originalPlayersList = MutableStateFlow<List<Player>>(emptyList())
 
     private var _typeOfTimer by mutableIntStateOf(-1)
 
@@ -40,13 +42,17 @@ open class SharedViewModel : ViewModel() {
     private val _isRunning = MutableStateFlow(false)
     val isRunning = _isRunning.asStateFlow()
 
+    private val _showGameOverDialog = MutableStateFlow(false)
+    val showGameOverDialog = _showGameOverDialog.asStateFlow()
+
+    private val _gameOver = MutableStateFlow(false)
+    val gameOver = _gameOver.asStateFlow()
+
     private var timerJob: Job? = null
 
-    init {
-        startTimer()
-    }
-
     fun togglePauseResume() {
+        if (_gameOver.value) return
+
         println("Se llamó a tooglePauseResume")
         _isRunning.value = !_isRunning.value
         if (_isRunning.value) {
@@ -105,8 +111,13 @@ open class SharedViewModel : ViewModel() {
                                 .coerceAtLeast(0)
                         )
                     }
-
                     println("Tiempo actualizado todo el game: ${_playersList.value[_currentPlayerIndex].totalTimeInSeconds}")
+
+                    if (_playersList.value[_currentPlayerIndex].totalTimeInSeconds == 0) {
+                        _isRunning.value = false
+                        _showGameOverDialog.value = true
+                    }
+
                 } else {
                     _playersList.value = _playersList.value.toMutableList().apply {
                         this[_currentPlayerIndex] = this[_currentPlayerIndex].copy(
@@ -115,15 +126,22 @@ open class SharedViewModel : ViewModel() {
                         )
                     }
                     println("Tiempo actualizado por jugada: ${_playersList.value[_currentPlayerIndex].timePerMoveInSeconds}")
+
+                    if (_playersList.value[_currentPlayerIndex].timePerMoveInSeconds == 0) {
+                        _isRunning.value = false
+                        _showGameOverDialog.value = true
+                    }
                 }
             }
         }
     }
 
 
-    fun setPlayersList(list: List<Player>) {
+    fun setPlayersList(players: List<Player>) {
+        _gameOver.value = false
         _isRunning.value = false
-        _playersList.value = list
+        _originalPlayersList.value = players.map { it.copy() }
+        _playersList.value = _originalPlayersList.value
         _currentPlayerIndex = 0
     }
 
@@ -139,13 +157,20 @@ open class SharedViewModel : ViewModel() {
 
     fun setSelectedIncrementTime(incrementTime: Int) { _selectedIncrementTime = incrementTime }
 
-    //TOOLBAR TOOLS
+    // TOOLBAR TOOLS
     fun resetTimers() {
-        for (player in _playersList.value) {
-            player.timePerMoveInSeconds = _timePerMoveInSecondsGlobal
-            player.totalTimeInSeconds = _totalTimeGameGlobal
+        _gameOver.value = false
+        _playersList.value = _originalPlayersList.value.map { player ->
+            player.copy(
+                timePerMoveInSeconds = _timePerMoveInSecondsGlobal,
+                totalTimeInSeconds = _totalTimeGameGlobal
+            )
         }
         _currentPlayerIndex = 0
+        _showGameOverDialog.value = false
+        _isRunning.value = true
+        startTimer()
+        togglePauseResume()
     }
 
     fun saveGame(context: Context) {
@@ -193,5 +218,24 @@ open class SharedViewModel : ViewModel() {
             popUpTo(NameOfScreen.StartNav.name) { inclusive = true }
         }
         _currentPlayerIndex = 0
+    }
+
+    // END GAME FUNCTIONS
+    fun endGame() {
+        _gameOver.value = true
+        _showGameOverDialog.value = false
+    }
+
+    fun removePlayer(index: Int) {
+        val updatedList = _playersList.value.toMutableList().apply { removeAt(index) }
+        if (updatedList.isEmpty()) {
+            endGame()
+        } else {
+            _playersList.value = updatedList
+            _currentPlayerIndex %= updatedList.size
+            _showGameOverDialog.value = false
+            _isRunning.value = true
+            startTimer()
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.pernasA.multiplayerClocks.android.view
 
+import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -47,20 +47,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 
 import com.pernasA.multiplayerClocks.android.models.Player
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 
 @Composable
-fun GamePage(sharedViewModel: SharedViewModel) {
-    val players by sharedViewModel.playersList.collectAsState()
+fun GamePage(viewModel: SharedViewModel) {
+    val players by viewModel.playersList.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
+    val showGameOverDialog = viewModel.showGameOverDialog.collectAsState()
+    val remainingPlayers = viewModel.playersList.collectAsState().value.size
+
     Scaffold( snackbarHost = { SnackbarHost(snackbarHostState) },
     topBar = {
-        GamePageToolbar(sharedViewModel) },
+        GamePageToolbar(viewModel) },
         content = { paddingValues ->
             LazyColumn(
                 modifier = Modifier
@@ -73,9 +75,43 @@ fun GamePage(sharedViewModel: SharedViewModel) {
                     players.forEachIndexed { index, player ->
                         PlayerCard(
                             player = player, index = index,
-                            viewModel = sharedViewModel,
+                            viewModel = viewModel,
                             snackbarHostState, coroutineScope
                         )
+                    }
+                    if (showGameOverDialog.value) {
+                        if (remainingPlayers == 2) {
+
+                            // Caso donde solo quedan 2 jugadores y uno pierde
+                            AlertDialog(
+                                onDismissRequest = {},
+                                title = { Text("¡Juego terminado!") },
+                                text = { Text("${players[viewModel.currentPlayerIndex].name} se quedó sin tiempo\n " +
+                                        "¡¡El ganador es ${players[(viewModel.currentPlayerIndex+1)%2].name}!!") },
+                                confirmButton = {
+                                    Button(onClick = { viewModel.endGame() }) {
+                                        Text("Aceptar")
+                                    }
+                                }
+                            )
+                        } else {
+                            // Caso normal cuando hay más de 2 jugadores
+                            AlertDialog(
+                                onDismissRequest = {},
+                                title = { Text("¡Tiempo agotado!") },
+                                text = { Text("${players[viewModel.currentPlayerIndex].name} se quedó sin tiempo. ¿Qué desean hacer?") },
+                                confirmButton = {
+                                    Button(onClick = { viewModel.endGame() }) {
+                                        Text("Finalizar juego")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(onClick = { viewModel.removePlayer(viewModel.currentPlayerIndex) }) {
+                                        Text("Eliminar jugador")
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -167,7 +203,7 @@ private fun ConfigurationModal(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Reiniciar timers")
+                Text("Reiniciar partida")
             }
 
             Spacer(modifier = Modifier.height(8.dp))

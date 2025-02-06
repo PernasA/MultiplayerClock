@@ -61,23 +61,21 @@ fun PlayerCard(
 
     val isRunning = viewModel.isRunning.collectAsState()
     val isCurrentPlayer = index == viewModel.currentPlayerIndex
+    val gameOver = viewModel.gameOver.collectAsState()
 
-    // Animación de brillo para el jugador activo
     val animatedBorder by animateColorAsState(
         targetValue = colorPlayer,
-        //targetValue = if (isCurrentPlayer) Color.Yellow else colorPlayer,
         animationSpec = tween(durationMillis = 500), label = "animatedBorder"
     )
 
-    // Opacidad del fondo (jugador activo con fondo más claro)
-    val backgroundColor = if (isCurrentPlayer) Color(0xFFB0B0B0) else Color(0xFFF0F0F0) //TODO
+    val backgroundColor = if (isCurrentPlayer) player.color.copy(alpha = 0.2f) else player.color.copy(alpha = 0.05f)
 
     Card(
         modifier = Modifier
             .padding(16.dp)
             .width(200.dp)
             .height(140.dp)
-            .clickable {
+            .clickable(enabled = !gameOver.value) { // Deshabilitar si el juego terminó
                 if (isCurrentPlayer) {
                     if (isRunning.value) {
                         viewModel.switchToNextPlayer()
@@ -89,20 +87,15 @@ fun PlayerCard(
                 }
             },
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(
-            if (isCurrentPlayer) 7.dp else 4.dp,
-            animatedBorder
-        ), // Cambio de borde animado
-        colors = CardDefaults.cardColors(containerColor = backgroundColor) // Cambio de fondo dinámico
+        border = BorderStroke(if (isCurrentPlayer) 8.dp else 5.dp, animatedBorder),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
+                modifier = Modifier.fillMaxWidth().height(60.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
@@ -110,7 +103,6 @@ fun PlayerCard(
                     text = (index + 1).toString(),
                     color = Color.Black,
                     fontSize = TITLE_TEXT_SIZE,
-                    lineHeight = TITLE_TEXT_SIZE,
                     fontWeight = if (isCurrentPlayer) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.width(40.dp).padding(horizontal = 15.dp)
                 )
@@ -122,7 +114,6 @@ fun PlayerCard(
                     text = player.name,
                     color = Color.Black,
                     fontSize = TITLE_TEXT_SIZE,
-                    lineHeight = TITLE_TEXT_SIZE,
                     fontWeight = if (isCurrentPlayer) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.padding(start = 8.dp)
                 )
