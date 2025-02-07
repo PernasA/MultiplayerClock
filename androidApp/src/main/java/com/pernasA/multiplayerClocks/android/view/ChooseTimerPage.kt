@@ -70,6 +70,8 @@ fun ChooseTimerPage(
                 val playersList = sharedViewModel.playersList.collectAsState()
                 Button(
                     onClick = {
+                        sharedViewModel.getSoundsController().playButtonTickSound()
+
                         val totalSeconds = selectedTimeMinutes * 60 + selectedTimeSeconds
                         val incrementSecondsTotal = incrementSeconds
 

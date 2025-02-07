@@ -5,7 +5,7 @@
     <string name="title_main_page">RELOJES</string>
     <string name="subtitle_main_page">PARA JUEGOS DE MESA</string>
     <string name="start_game">Comenzar partida</string>
-    <string name="load_previous_game">Jugar partida guarda</string>
+    <string name="load_previous_game">Jugar partida guardada</string>
 
     #NAVIGATION IN TOOLBAR
     <string name="main_page_appbar_title">Home</string>

@@ -1,5 +1,6 @@
 package com.pernasA.multiplayerClocks.android.main
 
+import android.app.Application
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ import com.pernasA.multiplayerClocks.android.view.HomePage
 import com.pernasA.multiplayerClocks.android.view.LoadPreviousGamePage
 import com.pernasA.multiplayerClocks.android.view.SelectPlayersPage
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
+import com.pernasA.multiplayerClocks.android.viewModel.SoundsController
 import com.pernasA.multiplayerclock.android.R
 import kotlinx.coroutines.CoroutineScope
 
@@ -54,8 +56,12 @@ fun Navigation(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = getCurrentScreen(backStackEntry?.destination?.route)
+    val localContext = LocalContext.current.applicationContext as Application
+    val soundsController = SoundsController(localContext)
     val sharedViewModel: SharedViewModel = viewModel()
+
     sharedViewModel.setNavController(navController)
+    sharedViewModel.setSoundsController(soundsController)
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -141,7 +147,8 @@ private fun CreateNavigationHost(
                         isLoading = false
                     }
                 },
-                isLoading = isLoading
+                isLoading = isLoading,
+                sharedViewModel
             )
         }
 

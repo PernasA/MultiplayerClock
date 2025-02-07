@@ -21,22 +21,13 @@ import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.SUBTITLE_
 // el primaryContainer es para el fondo de la card
 // el secondaryContainer es para los botones del HomePage
 
-val DarkColorScheme = darkColorScheme(
-    primary = ButtonRedPrimary,
-    secondary = ButtonRedSecondary,
-    tertiary = ButtonRedTertiary,
-    primaryContainer = ButtonRedPrimaryContainer,
-    secondaryContainer = ButtonRedSecondaryContainer,
-    onSurfaceVariant = Color.Black,
-)
-
 val LightColorScheme = lightColorScheme(
-    primary = ButtonRedPrimary,
-    secondary = ButtonRedSecondary,
-    tertiary = ButtonRedTertiary,
-    primaryContainer = ButtonRedPrimaryContainer,
-    secondaryContainer = ButtonRedSecondaryContainer,
-    onSurfaceVariant = Color.White,
+    primary = ButtonPrimary,
+    secondary = ButtonSecondary,
+    tertiary = ButtonTertiary,
+    primaryContainer = ButtonPrimaryContainer,
+    secondaryContainer = ButtonSecondaryContainer,
+    onSurfaceVariant = Color.Black, // Mejor contraste sobre fondo blanco
 )
 
 @Composable
@@ -60,8 +51,7 @@ fun MyClocksAppTheme(
         large = RoundedCornerShape(0.dp)
     )
 
-    val colorScheme = if (darkTheme) DarkColorScheme
-    else LightColorScheme
+    val colorScheme = LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

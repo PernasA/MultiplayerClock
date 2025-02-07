@@ -53,18 +53,20 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 
 import com.pernasA.multiplayerClocks.android.utils.BluePrimary
-import com.pernasA.multiplayerClocks.android.utils.ButtonRedPrimaryContainer
+import com.pernasA.multiplayerClocks.android.utils.ButtonPrimaryContainer
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.BUTTON_HOME_TEXT_SIZE
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TITLE_TEXT_SIZE
 import com.pernasA.multiplayerClocks.android.utils.MyClocksAppTheme
-import com.pernasA.multiplayerClocks.android.utils.RedPrimary
+import com.pernasA.multiplayerClocks.android.utils.PrimaryAccent
+import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 import com.pernasA.multiplayerclock.android.R
 
 @Composable
 fun HomePage(
     selectPlayersOnClick: () -> Unit,
     loadGameOnClick: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    sharedViewModel: SharedViewModel
 ) {
     val showTooltip = remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -83,7 +85,8 @@ fun HomePage(
                 HomePageInit(
                     selectPlayersOnClick,
                     loadGameOnClick,
-                    showTooltip
+                    showTooltip,
+                    sharedViewModel
                 )
             }
         }
@@ -99,7 +102,7 @@ fun HomePage(
                 )
             }
         }
-        ExtendedShareButton()
+        ExtendedShareButton(sharedViewModel)
     }
 }
 
@@ -107,7 +110,8 @@ fun HomePage(
 fun HomePageInit(
     selectPlayersOnClick: () -> Unit,
     loadGameOnClick: () -> Unit,
-    showTooltip: MutableState<Boolean>
+    showTooltip: MutableState<Boolean>,
+    sharedViewModel: SharedViewModel
 ) {
     Column(
         modifier = Modifier
@@ -138,9 +142,16 @@ fun HomePageInit(
             MyFilledButton(
                 selectPlayersOnClick,
                 R.string.start_game,
-                Modifier.padding(top = 15.dp)
+                Modifier.padding(top = 15.dp),
+                sharedViewModel
             )
-            RowRoutesButtons(loadGameOnClick, showTooltip)
+            MyFilledButton(
+                loadGameOnClick,
+                R.string.load_previous_game,
+                Modifier.padding(top = 15.dp),
+                sharedViewModel
+            )
+            //RowRoutesButtons(loadGameOnClick, showTooltip)
         }
     }
 }
@@ -181,17 +192,21 @@ fun MyFilledButton(
     onClick: () -> Unit,
     buttonText: Int,
     modifier: Modifier,
-    textColor: Color? = Color.White
-) {
+    sharedViewModel: SharedViewModel,
+
+    ) {
     FilledTonalButton(
-        onClick = { onClick() },
+        onClick = {
+            sharedViewModel.getSoundsController().playButtonTickSound()
+            onClick()
+                  },
         modifier.fillMaxWidth(),
-        border = BorderStroke(0.7.dp, ButtonRedPrimaryContainer),
+        border = BorderStroke(0.7.dp, ButtonPrimaryContainer),
     ) {
         Text(
             stringResource(buttonText),
             fontSize = BUTTON_HOME_TEXT_SIZE,
-            color = textColor ?: Color.White,
+            color = Color.White,
             textAlign = TextAlign.Center
         )
     }
@@ -201,7 +216,8 @@ fun MyFilledButton(
 @Composable
 fun RowRoutesButtons(
     observationRoutesOnClick: () -> Unit,
-    showTooltipState: MutableState<Boolean>
+    showTooltipState: MutableState<Boolean>,
+    sharedViewModel: SharedViewModel
 ) {
     val showTooltip by showTooltipState
     Row (modifier = Modifier.padding(top = 18.dp)) {
@@ -210,7 +226,8 @@ fun RowRoutesButtons(
             R.string.load_previous_game,
             Modifier
                 .padding(end = 5.dp)
-                .weight(1F)
+                .weight(1F),
+            sharedViewModel
         )
         Box(modifier = Modifier.width(5.dp))
         Box(
@@ -242,7 +259,7 @@ fun RowRoutesButtons(
                     Surface(
                         modifier = Modifier.padding(8.dp),
                         shape = RoundedCornerShape(8.dp),
-                        color = RedPrimary,
+                        color = PrimaryAccent,
                         shadowElevation = 4.dp,
                         border = BorderStroke(0.5.dp, Color.White)
                     ) {
@@ -259,7 +276,7 @@ fun RowRoutesButtons(
 }
 
 @Composable
-fun ExtendedShareButton() {
+fun ExtendedShareButton(sharedViewModel: SharedViewModel) {
     val context = LocalContext.current
     val shareText = stringResource(id = R.string.button_share_text)
     val whatsappIntent = Intent(Intent.ACTION_VIEW).apply {
@@ -272,9 +289,12 @@ fun ExtendedShareButton() {
         contentAlignment = Alignment.BottomEnd
     ) {
         LargeFloatingActionButton(
-            onClick = { context.startActivity(whatsappIntent) },
+            onClick = {
+                sharedViewModel.getSoundsController().playButtonTickSound()
+                context.startActivity(whatsappIntent)
+                      },
             shape = CircleShape,
-            containerColor = ButtonRedPrimaryContainer,
+            containerColor = ButtonPrimaryContainer,
             contentColor = Color.Black,
             modifier = Modifier.size(60.dp)
         ) {
@@ -290,7 +310,8 @@ fun HomePagePreview() {
         HomePage(
             selectPlayersOnClick = {},
             loadGameOnClick = {},
-            isLoading = true
+            isLoading = true,
+            sharedViewModel = SharedViewModel()
         )
     }
 }

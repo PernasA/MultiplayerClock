@@ -102,7 +102,7 @@ fun PlayerCard(
                 Text(
                     text = (index + 1).toString(),
                     color = Color.Black,
-                    fontSize = TITLE_TEXT_SIZE,
+                    fontSize = 20.sp,
                     fontWeight = if (isCurrentPlayer) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.width(40.dp).padding(horizontal = 15.dp)
                 )

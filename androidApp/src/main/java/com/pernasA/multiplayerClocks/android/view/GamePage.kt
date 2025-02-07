@@ -1,19 +1,22 @@
 package com.pernasA.multiplayerClocks.android.view
 
-import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
@@ -64,70 +67,113 @@ fun GamePage(viewModel: SharedViewModel) {
     topBar = {
         GamePageToolbar(viewModel) },
         content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                item {
-                    players.forEachIndexed { index, player ->
+            if (players.size <= 4) {
+                // Modo de lista normal (uno debajo del otro)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(players.size) { index ->
                         PlayerCard(
-                            player = player, index = index,
+                            player = players[index], index = index,
                             viewModel = viewModel,
-                            snackbarHostState, coroutineScope
+                            snackbarHostState = snackbarHostState,
+                            coroutineScope = coroutineScope
                         )
                     }
-                    if (showGameOverDialog.value) {
-                        if (remainingPlayers == 2) {
+                }
+            } else {
+                // Modo de dos columnas en zig-zag
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(32.dp), // Asegura que las tarjetas no tengan espacios adicionales
+                    contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
+                    items(players.size) { index ->
+                        val offsetY =
+                            if (index % 2 == 0) 0.dp else 110.dp // Ajusta el valor según el tamaño de la card
 
-                            // Caso donde solo quedan 2 jugadores y uno pierde
-                            AlertDialog(
-                                onDismissRequest = {},
-                                title = { Text("¡Juego terminado!") },
-                                text = { Text("${players[viewModel.currentPlayerIndex].name} se quedó sin tiempo\n " +
-                                        "¡¡El ganador es ${players[(viewModel.currentPlayerIndex+1)%2].name}!!") },
-                                confirmButton = {
-                                    Button(onClick = { viewModel.endGame() }) {
-                                        Text("Aceptar")
-                                    }
-                                }
-                            )
-                        } else {
-                            // Caso normal cuando hay más de 2 jugadores
-                            AlertDialog(
-                                onDismissRequest = {},
-                                title = { Text("¡Tiempo agotado!") },
-                                text = { Text("${players[viewModel.currentPlayerIndex].name} se quedó sin tiempo. ¿Qué desean hacer?") },
-                                confirmButton = {
-                                    Button(onClick = { viewModel.endGame() }) {
-                                        Text("Finalizar juego")
-                                    }
-                                },
-                                dismissButton = {
-                                    Button(onClick = { viewModel.removePlayer(viewModel.currentPlayerIndex) }) {
-                                        Text("Eliminar jugador")
-                                    }
-                                }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .offset(y = offsetY)
+                                .padding(vertical = 20.dp)// Desplaza la tarjeta en Y sin afectar la estructura
+                        ) {
+                            PlayerCard(
+                                player = players[index], index = index,
+                                viewModel = viewModel,
+                                snackbarHostState = snackbarHostState,
+                                coroutineScope = coroutineScope
                             )
                         }
                     }
+                }
+            }
+
+            if (showGameOverDialog.value) {
+                if (remainingPlayers == 2) {
+                    viewModel.getSoundsController().playYouWinGameSound()
+                    // Caso donde solo quedan 2 jugadores y uno pierde
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text("¡Juego terminado!") },
+                        text = { Text("${players[viewModel.currentPlayerIndex].name} se quedó sin tiempo\n " +
+                                "¡¡El ganador es ${players[(viewModel.currentPlayerIndex+1)%2].name}!!") },
+                        confirmButton = {
+                            Button(onClick = {
+                                viewModel.getSoundsController().playButtonTickSound()
+                                viewModel.endGame()
+                            }) {
+                                Text("Aceptar")
+                            }
+                        }
+                    )
+                } else {
+                    viewModel.getSoundsController().playYouLoseGameSound()
+                    // Caso normal cuando hay más de 2 jugadores
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text("¡Tiempo agotado!") },
+                        text = { Text("${players[viewModel.currentPlayerIndex].name} se quedó sin tiempo. ¿Qué desean hacer?") },
+                        confirmButton = {
+                            Button(onClick = {
+                                viewModel.getSoundsController().playButtonTickSound()
+                                viewModel.endGame()
+                            }) {
+                                Text("Finalizar juego")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = {
+                                viewModel.removePlayer(viewModel.currentPlayerIndex)
+                                viewModel.getSoundsController().playButtonTickSound()
+                            }) {
+                                Text("Eliminar jugador")
+                            }
+                        }
+                    )
                 }
             }
         }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamePageToolbar(viewModel: SharedViewModel) {
     val showSettingsDialog = remember { mutableStateOf(false) }
-    val isSoundEnabled = remember { mutableStateOf(true) }
+    val soundsEnabled = viewModel.getSoundsController().soundsEnabled
+
     val iconsSize = 40.dp
     val isRunning by viewModel.isRunning.collectAsState()
 
-    Column {
+    Column (Modifier.padding(bottom = 10.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -174,7 +220,7 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
     }
 
     if (showSettingsDialog.value) {
-        ConfigurationModal(showSettingsDialog, viewModel, isSoundEnabled)
+        ConfigurationModal(showSettingsDialog, viewModel, soundsEnabled)
     }
 }
 
@@ -183,7 +229,7 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
 private fun ConfigurationModal(
     showSettingsDialog: MutableState<Boolean>,
     viewModel: SharedViewModel,
-    isSoundEnabled: MutableState<Boolean>
+    soundsEnabled: MutableState<Boolean>
 ) {
     ModalBottomSheet(
         onDismissRequest = { showSettingsDialog.value = false },
@@ -198,6 +244,7 @@ private fun ConfigurationModal(
             // Botón Reiniciar timers
             Button(
                 onClick = {
+                    viewModel.getSoundsController().playButtonTickSound()
                     viewModel.resetTimers()
                     showSettingsDialog.value = false
                 },
@@ -212,6 +259,7 @@ private fun ConfigurationModal(
             val localContext = LocalContext.current
             Button(
                 onClick = {
+                    viewModel.getSoundsController().playButtonTickSound()
                     viewModel.saveGame(localContext)
                     showSettingsDialog.value = false
                 },
@@ -224,6 +272,7 @@ private fun ConfigurationModal(
 
             Button(
                 onClick = {
+                    viewModel.getSoundsController().playButtonTickSound()
                     showSettingsDialog.value = false
                     viewModel.goToMenuPage()
                 },
@@ -234,11 +283,14 @@ private fun ConfigurationModal(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            IconButton(onClick = { isSoundEnabled.value = !isSoundEnabled.value }) {
-                Icon(
-                    imageVector = if (isSoundEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,
+            IconButton(onClick = {
+                viewModel.getSoundsController().playButtonTickSound()
+                viewModel.getSoundsController().toggleSound()
+            }) {
+            Icon(
+                    imageVector = if (soundsEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,
                     contentDescription = "Sonido",
-                    tint = if (isSoundEnabled.value) Color.Green else Color.Gray
+                    tint = if (soundsEnabled.value) Color.Green else Color.Gray
                 )
             }
         }

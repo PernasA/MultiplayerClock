@@ -179,8 +179,10 @@ open class SharedViewModel : ViewModel() {
 
         val gson = Gson()
         val playersJson = gson.toJson(_playersList.value)
+        val originalPlayersJson = gson.toJson(_originalPlayersList.value)
 
         editor.putString("playersList", playersJson)
+        editor.putString("originalPlayersList", originalPlayersJson)
         editor.putInt("currentPlayerIndex", _currentPlayerIndex)
         editor.putInt("typeOfTimer", _typeOfTimer)
         editor.putInt("timePerMoveInSecondsGlobal", _timePerMoveInSecondsGlobal)
@@ -195,10 +197,14 @@ open class SharedViewModel : ViewModel() {
 
         val gson = Gson()
         val playersJson = sharedPreferences.getString("playersList", "[]")
+        val originalPlayersJson = sharedPreferences.getString("originalPlayersList", "[]")
+
         val type = object : TypeToken<List<Player>>() {}.type
         val savedPlayers: List<Player> = gson.fromJson(playersJson, type)
+        val savedOriginalPlayers: List<Player> = gson.fromJson(originalPlayersJson, type)
 
         _playersList.value = savedPlayers
+        _originalPlayersList.value = savedOriginalPlayers
         _currentPlayerIndex = sharedPreferences.getInt("currentPlayerIndex", 0)
         _typeOfTimer = sharedPreferences.getInt("typeOfTimer", -1)
         _timePerMoveInSecondsGlobal = sharedPreferences.getInt("timePerMoveInSecondsGlobal", 0)
@@ -207,7 +213,6 @@ open class SharedViewModel : ViewModel() {
 
         return savedPlayers.isNotEmpty() && _typeOfTimer != -1
     }
-
 
     fun setNavController(navController: NavHostController) {
         this.navController = navController
@@ -238,4 +243,10 @@ open class SharedViewModel : ViewModel() {
             startTimer()
         }
     }
+
+    fun setSoundsController(soundsController: SoundsController) {
+        this.soundsController = soundsController
+    }
+
+    fun getSoundsController() = soundsController
 }

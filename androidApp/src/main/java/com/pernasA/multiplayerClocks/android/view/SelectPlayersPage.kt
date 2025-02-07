@@ -156,18 +156,25 @@ fun SelectPlayersPage(
                 TimeModeCard(
                     title = "Tiempo por cada jugada",
                     isSelected = selectedTimeMode == TIME_EACH_MOVE,
-                    onClick = { selectedTimeMode = TIME_EACH_MOVE }
+                    onClick = {
+                        sharedViewModel.getSoundsController().playButtonTickSound()
+                        selectedTimeMode = TIME_EACH_MOVE
+                    }
                 )
                 TimeModeCard(
                     title = "Tiempo por el total de la partida",
                     isSelected = selectedTimeMode == TIME_ALL_GAME,
-                    onClick = { selectedTimeMode = TIME_ALL_GAME }
+                    onClick = {
+                        selectedTimeMode = TIME_ALL_GAME
+                        sharedViewModel.getSoundsController().playButtonTickSound()
+                    }
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
+                    sharedViewModel.getSoundsController().playButtonTickSound()
                     val playersList = mutableListOf<Player>()
                     for (i in playerNames.indices) {
                         val name = playerNames[i]
@@ -212,7 +219,7 @@ fun PlayerRow(
         TextField(
             value = playerName,
             onValueChange = { newName ->
-                if (newName.length <= 10) {
+                if (newName.length <= 9) {
                     onNameChange(newName.replaceFirstChar { it.uppercaseChar() })
                 }
             },
