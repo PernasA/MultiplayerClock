@@ -109,7 +109,10 @@ fun SelectPlayersPage(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(bottom = 12.dp)
             ) {
-                IconButton(onClick = { if (playerCount > 2) playerCount-- }) {
+                IconButton(onClick = {
+                    sharedViewModel.getSoundsController().playChangePlayerSound()
+                    if (playerCount > 2) playerCount--
+                }) {
                     Icon(
                         modifier = Modifier.size(40.dp),
                         imageVector = Icons.Filled.Remove,
@@ -124,7 +127,10 @@ fun SelectPlayersPage(
                         .wrapContentSize(Alignment.Center)
                 )
 
-                IconButton(onClick = { if (playerCount < 8) playerCount++ }) {
+                IconButton(onClick = {
+                    sharedViewModel.getSoundsController().playChangePlayerSound()
+                    if (playerCount < 8) playerCount++
+                }) {
                     Icon(
                         modifier = Modifier.size(40.dp),
                         imageVector = Icons.Filled.Add,

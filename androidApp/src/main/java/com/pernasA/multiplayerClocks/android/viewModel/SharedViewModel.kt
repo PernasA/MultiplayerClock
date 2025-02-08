@@ -58,12 +58,14 @@ open class SharedViewModel : ViewModel() {
         if (_isRunning.value) {
             startTimer()
         } else {
+            getSoundsController().stopTenSecondsLeftSound()
             println("Se pausó el timer. con timerJob.cancel")
             timerJob?.cancel()
         }
     }
 
     fun togglePause() {
+        getSoundsController().stopTenSecondsLeftSound()
         if (_isRunning.value) {
             println("Se pausó el timer. con timerJob.cancel")
             _isRunning.value = false
@@ -110,6 +112,10 @@ open class SharedViewModel : ViewModel() {
                             totalTimeInSeconds = (this[_currentPlayerIndex].totalTimeInSeconds - 1)
                                 .coerceAtLeast(0)
                         )
+                        val newTime = (this[_currentPlayerIndex].totalTimeInSeconds - 1).coerceAtLeast(0)
+                        if (newTime <= 10) {
+                            soundsController.playTenSecondsLeft()
+                        }
                     }
                     println("Tiempo actualizado todo el game: ${_playersList.value[_currentPlayerIndex].totalTimeInSeconds}")
 
@@ -124,6 +130,11 @@ open class SharedViewModel : ViewModel() {
                             timePerMoveInSeconds = (this[_currentPlayerIndex].timePerMoveInSeconds - 1)
                                 .coerceAtLeast(0)
                         )
+
+                        val newTime = (this[_currentPlayerIndex].timePerMoveInSeconds - 1).coerceAtLeast(0)
+                        if (newTime <= 10) {
+                            soundsController.playTenSecondsLeft()
+                        }
                     }
                     println("Tiempo actualizado por jugada: ${_playersList.value[_currentPlayerIndex].timePerMoveInSeconds}")
 

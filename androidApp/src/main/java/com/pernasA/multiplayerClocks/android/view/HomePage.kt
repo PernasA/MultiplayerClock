@@ -18,8 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -54,6 +58,7 @@ import androidx.compose.ui.window.PopupProperties
 
 import com.pernasA.multiplayerClocks.android.utils.BluePrimary
 import com.pernasA.multiplayerClocks.android.utils.ButtonPrimaryContainer
+import com.pernasA.multiplayerClocks.android.utils.ButtonTertiary
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.BUTTON_HOME_TEXT_SIZE
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TITLE_TEXT_SIZE
 import com.pernasA.multiplayerClocks.android.utils.MyClocksAppTheme
@@ -102,7 +107,7 @@ fun HomePage(
                 )
             }
         }
-        ExtendedShareButton(sharedViewModel)
+        ToolsButtonsBottom(sharedViewModel, sharedViewModel.getSoundsController().soundsEnabled)
     }
 }
 
@@ -276,29 +281,55 @@ fun RowRoutesButtons(
 }
 
 @Composable
-fun ExtendedShareButton(sharedViewModel: SharedViewModel) {
+fun ToolsButtonsBottom(sharedViewModel: SharedViewModel, soundsEnabled: MutableState<Boolean>) {
     val context = LocalContext.current
     val shareText = stringResource(id = R.string.button_share_text)
     val whatsappIntent = Intent(Intent.ACTION_VIEW).apply {
         data = Uri.parse("https://api.whatsapp.com/send?text=$shareText") //TODO: CHECKEAR EL LINK A LA PLAY STORE
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(end = 10.dp),
-        contentAlignment = Alignment.BottomEnd
+        contentAlignment = Alignment.BottomEnd // Botón de WhatsApp en la parte inferior derecha
     ) {
+        // Botón de WhatsApp
         LargeFloatingActionButton(
             onClick = {
                 sharedViewModel.getSoundsController().playButtonTickSound()
                 context.startActivity(whatsappIntent)
-                      },
+            },
             shape = CircleShape,
-            containerColor = ButtonPrimaryContainer,
+            containerColor = ButtonTertiary,
             contentColor = Color.Black,
             modifier = Modifier.size(60.dp)
         ) {
             Icon(Icons.Filled.Share, stringResource(R.string.button_share_description))
+        }
+    }
+
+    // Botón de sonido a la izquierda
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 10.dp, bottom = 10.dp), // Asegúrate de no solaparse con el botón derecho
+        contentAlignment = Alignment.BottomStart // Botón a la izquierda
+    ) {
+        LargeFloatingActionButton(
+            onClick = {
+                sharedViewModel.getSoundsController().toggleSound()
+            },
+            shape = CircleShape,
+            containerColor = ButtonTertiary,
+            contentColor = Color.Black,
+            modifier = Modifier.size(60.dp)
+        ) {
+            Icon(
+                imageVector = if (soundsEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,
+                contentDescription = "Sonido",
+                tint = if (soundsEnabled.value) Color.Green else Color.White
+            )
         }
     }
 }

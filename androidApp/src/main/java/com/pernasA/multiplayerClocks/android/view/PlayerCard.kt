@@ -75,9 +75,11 @@ fun PlayerCard(
             .padding(16.dp)
             .width(200.dp)
             .height(140.dp)
-            .clickable(enabled = !gameOver.value) { // Deshabilitar si el juego terminó
+            .clickable(enabled = !gameOver.value) {
                 if (isCurrentPlayer) {
                     if (isRunning.value) {
+                        viewModel.getSoundsController().stopTenSecondsLeftSound()
+                        viewModel.getSoundsController().playChangePlayerSound()
                         viewModel.switchToNextPlayer()
                     } else {
                         coroutineScope.launch {

@@ -1,5 +1,6 @@
 package com.pernasA.multiplayerClocks.android.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
@@ -52,7 +54,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 import com.pernasA.multiplayerClocks.android.models.Player
+import com.pernasA.multiplayerClocks.android.utils.ButtonPrimary
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
+import nl.dionsegijn.konfetti.compose.KonfettiView
+import nl.dionsegijn.konfetti.core.Party
+import nl.dionsegijn.konfetti.core.emitter.Emitter
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun GamePage(viewModel: SharedViewModel) {
@@ -117,9 +124,12 @@ fun GamePage(viewModel: SharedViewModel) {
                 }
             }
 
+            val konfettiController = remember { mutableStateOf(false) }
+
             if (showGameOverDialog.value) {
                 if (remainingPlayers == 2) {
                     viewModel.getSoundsController().playYouWinGameSound()
+                    konfettiController.value = true
                     // Caso donde solo quedan 2 jugadores y uno pierde
                     AlertDialog(
                         onDismissRequest = {},
@@ -128,6 +138,7 @@ fun GamePage(viewModel: SharedViewModel) {
                                 "¡¡El ganador es ${players[(viewModel.currentPlayerIndex+1)%2].name}!!") },
                         confirmButton = {
                             Button(onClick = {
+                                konfettiController.value = false
                                 viewModel.getSoundsController().playButtonTickSound()
                                 viewModel.endGame()
                             }) {
@@ -161,6 +172,28 @@ fun GamePage(viewModel: SharedViewModel) {
                     )
                 }
             }
+
+            if (konfettiController.value) {
+                KonfettiView(
+                    modifier = Modifier.fillMaxSize(),
+                    parties = listOf(
+                        Party(
+                            speed = 10f,
+                            maxSpeed = 30f,
+                            damping = 0.9f,
+                            angle = 270,
+                            spread = 90,
+                            shapes = listOf(
+                                nl.dionsegijn.konfetti.core.models.Shape.Circle,
+                                nl.dionsegijn.konfetti.core.models.Shape.Square
+                            ),
+                            timeToLive = 3000L,
+                            emitter = Emitter(duration = 3, TimeUnit.SECONDS)
+                                .perSecond(100)
+                        )
+                    )
+                )
+            }
         }
     )
 }
@@ -186,7 +219,10 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable { viewModel.togglePauseResume() },
+                    .clickable {
+                        viewModel.getSoundsController().playPauseOrPlaySound()
+                        viewModel.togglePauseResume()
+                               },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -205,6 +241,7 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
                     .fillMaxHeight()
                     .clickable {
                         viewModel.togglePause()
+                        viewModel.getSoundsController().playConfigurationMenuSound()
                         showSettingsDialog.value = true
                     },
                 contentAlignment = Alignment.Center
@@ -283,14 +320,22 @@ private fun ConfigurationModal(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            IconButton(onClick = {
-                viewModel.getSoundsController().playButtonTickSound()
-                viewModel.getSoundsController().toggleSound()
-            }) {
-            Icon(
+            IconButton(
+                onClick = {
+                    viewModel.getSoundsController().toggleSound()
+                },
+                modifier = Modifier
+                    .size(60.dp) // Tamaño del icono aumentado
+                    .background(
+                        color = if (soundsEnabled.value) ButtonPrimary else Color.Gray,
+                        shape = CircleShape
+                    )
+                    .padding(10.dp) // Espaciado alrededor del icono
+            ) {
+                Icon(
                     imageVector = if (soundsEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,
                     contentDescription = "Sonido",
-                    tint = if (soundsEnabled.value) Color.Green else Color.Gray
+                    tint = Color.White
                 )
             }
         }
