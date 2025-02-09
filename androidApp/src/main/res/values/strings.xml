@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    #APP
+    <string name="app_name">Relojes Multijugador</string>
+
     #BUTTON AND TITLES
     <string name="title_main_page">RELOJES</string>
     <string name="subtitle_main_page">PARA JUEGOS DE MESA</string>

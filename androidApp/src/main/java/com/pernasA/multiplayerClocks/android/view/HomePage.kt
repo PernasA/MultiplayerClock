@@ -4,13 +4,16 @@ import android.content.Intent
 import android.net.Uri
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,41 +23,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 
 import com.pernasA.multiplayerClocks.android.utils.BluePrimary
 import com.pernasA.multiplayerClocks.android.utils.ButtonPrimaryContainer
@@ -62,7 +52,6 @@ import com.pernasA.multiplayerClocks.android.utils.ButtonTertiary
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.BUTTON_HOME_TEXT_SIZE
 import com.pernasA.multiplayerClocks.android.utils.Constants.Companion.TITLE_TEXT_SIZE
 import com.pernasA.multiplayerClocks.android.utils.MyClocksAppTheme
-import com.pernasA.multiplayerClocks.android.utils.PrimaryAccent
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 import com.pernasA.multiplayerclock.android.R
 
@@ -73,40 +62,35 @@ fun HomePage(
     isLoading: Boolean = false,
     sharedViewModel: SharedViewModel
 ) {
-    val showTooltip = remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.image_clocks_colour),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.7f
+        )
+
         LazyColumn(
-            Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures {
-                        if (showTooltip.value) {
-                            showTooltip.value = false
-                        }
-                    }
-                },
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                HomePageInit(
-                    selectPlayersOnClick,
-                    loadGameOnClick,
-                    showTooltip,
-                    sharedViewModel
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    HomePageInit(
+                        selectPlayersOnClick,
+                        loadGameOnClick,
+                        sharedViewModel
+                    )
+                }
             }
         }
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center)
-            ) {
-                CircularProgressIndicator(
-                    color = BluePrimary,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
+
         ToolsButtonsBottom(sharedViewModel, sharedViewModel.getSoundsController().soundsEnabled)
     }
 }
@@ -115,35 +99,26 @@ fun HomePage(
 fun HomePageInit(
     selectPlayersOnClick: () -> Unit,
     loadGameOnClick: () -> Unit,
-    showTooltip: MutableState<Boolean>,
     sharedViewModel: SharedViewModel
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ){
-        RowTitle(
+        ColumnTitleAndSubtitle(
             Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 8.dp)
-        )
-
-        ZoomableImage(
-            R.drawable.relojes_triangulo,
-            Modifier
-                .size(300.dp)
-                .padding(top = 20.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .shadow(100.dp, RoundedCornerShape(32.dp))
-                .border(BorderStroke(1.dp, BluePrimary), RoundedCornerShape(32.dp)),
-            ContentScale.Crop
+                .padding(start = 8.dp, end = 8.dp)
         )
 
         Column (
             Modifier
                 .width(250.dp)
-                .padding(top = 26.dp)) {
+                .padding(top = 130.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
             MyFilledButton(
                 selectPlayersOnClick,
                 R.string.start_game,
@@ -153,44 +128,59 @@ fun HomePageInit(
             MyFilledButton(
                 loadGameOnClick,
                 R.string.load_previous_game,
-                Modifier.padding(top = 15.dp),
+                Modifier.padding(top = 40.dp),
                 sharedViewModel
             )
-            //RowRoutesButtons(loadGameOnClick, showTooltip)
         }
     }
 }
 
 @Composable
-fun RowTitle(modifier: Modifier) {
-    Text(
-        text = stringResource(R.string.title_main_page),
-        style = TextStyle(
-            fontWeight = FontWeight.ExtraBold,
-            fontFamily = FontFamily.Serif,
-            fontSize = 65.sp,
-            lineHeight = 65.sp,
-            letterSpacing = 6.sp,
-            textAlign = TextAlign.Center,
-            color = Color.Black,
-            shadow = Shadow(BluePrimary),
-        ),
-        modifier = modifier.padding(top = 15.dp)
-    )
-    Text(
-        text = stringResource(R.string.subtitle_main_page),
-        style = TextStyle(
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Serif,
-            fontSize = TITLE_TEXT_SIZE,
-            lineHeight = TITLE_TEXT_SIZE,
-            textAlign = TextAlign.Center,
-            color = BluePrimary,
-            shadow = Shadow(BluePrimary)
-        ),
-        modifier = modifier.padding(5.dp)
-    )
+fun ColumnTitleAndSubtitle(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 150.dp, bottom = 16.dp)
+            .background(
+                color = Color.White.copy(alpha = 0.8f),
+                shape = RoundedCornerShape(80.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.title_main_page),
+                style = TextStyle(
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = FontFamily.Serif,
+                    fontSize = 65.sp,
+                    lineHeight = 65.sp,
+                    letterSpacing = 6.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
+                )
+            )
+            Spacer(modifier = Modifier.height(10.dp)) // Espaciado entre título y subtítulo
+            Text(
+                text = stringResource(R.string.subtitle_main_page),
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Serif,
+                    fontSize = TITLE_TEXT_SIZE,
+                    lineHeight = TITLE_TEXT_SIZE,
+                    textAlign = TextAlign.Center,
+                    color = BluePrimary,
+                    shadow = Shadow(BluePrimary)
+                ),
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+        }
+    }
 }
+
+
 
 @Composable
 fun MyFilledButton(
@@ -198,15 +188,14 @@ fun MyFilledButton(
     buttonText: Int,
     modifier: Modifier,
     sharedViewModel: SharedViewModel,
-
     ) {
     FilledTonalButton(
         onClick = {
             sharedViewModel.getSoundsController().playButtonTickSound()
             onClick()
                   },
-        modifier.fillMaxWidth(),
-        border = BorderStroke(0.7.dp, ButtonPrimaryContainer),
+        modifier.fillMaxWidth().height(100.dp),
+        border = BorderStroke(2.5.dp, ButtonPrimaryContainer),
     ) {
         Text(
             stringResource(buttonText),
@@ -214,69 +203,6 @@ fun MyFilledButton(
             color = Color.White,
             textAlign = TextAlign.Center
         )
-    }
-}
-
-
-@Composable
-fun RowRoutesButtons(
-    observationRoutesOnClick: () -> Unit,
-    showTooltipState: MutableState<Boolean>,
-    sharedViewModel: SharedViewModel
-) {
-    val showTooltip by showTooltipState
-    Row (modifier = Modifier.padding(top = 18.dp)) {
-        MyFilledButton(
-            observationRoutesOnClick,
-            R.string.load_previous_game,
-            Modifier
-                .padding(end = 5.dp)
-                .weight(1F),
-            sharedViewModel
-        )
-        Box(modifier = Modifier.width(5.dp))
-        Box(
-            modifier = Modifier.pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    showTooltipState.value = !showTooltip
-                })
-            }
-        ) {
-            LargeFloatingActionButton(
-                onClick = { showTooltipState.value = !showTooltip },
-                shape = CircleShape,
-                modifier = Modifier.size(45.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Info,
-                    stringResource(R.string.button_info),
-                    tint = Color.Black,
-                    modifier = Modifier.size(33.dp)
-                )
-            }
-
-            if (showTooltip) {
-                Popup(
-                    alignment = Alignment.TopEnd,
-                    offset = IntOffset(200, -200),
-                    properties = PopupProperties(focusable = false)
-                ) {
-                    Surface(
-                        modifier = Modifier.padding(8.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        color = PrimaryAccent,
-                        shadowElevation = 4.dp,
-                        border = BorderStroke(0.5.dp, Color.White)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.button_info_text),
-                            modifier = Modifier.padding(8.dp),
-                            color = Color.Black
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -291,7 +217,7 @@ fun ToolsButtonsBottom(sharedViewModel: SharedViewModel, soundsEnabled: MutableS
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(end = 10.dp),
+            .padding(end = 10.dp, bottom = 10.dp),
         contentAlignment = Alignment.BottomEnd // Botón de WhatsApp en la parte inferior derecha
     ) {
         // Botón de WhatsApp
@@ -303,7 +229,12 @@ fun ToolsButtonsBottom(sharedViewModel: SharedViewModel, soundsEnabled: MutableS
             shape = CircleShape,
             containerColor = ButtonTertiary,
             contentColor = Color.Black,
-            modifier = Modifier.size(60.dp)
+            modifier = Modifier.size(70.dp)
+                .border(
+                    width = 2.dp,
+                    color = Color.Black,
+                    shape = CircleShape
+                )
         ) {
             Icon(Icons.Filled.Share, stringResource(R.string.button_share_description))
         }
@@ -323,12 +254,17 @@ fun ToolsButtonsBottom(sharedViewModel: SharedViewModel, soundsEnabled: MutableS
             shape = CircleShape,
             containerColor = ButtonTertiary,
             contentColor = Color.Black,
-            modifier = Modifier.size(60.dp)
+            modifier = Modifier.size(70.dp)
+                .border(
+                    width = 2.dp,
+                    color = Color.Black,
+                    shape = CircleShape
+                )
         ) {
             Icon(
                 imageVector = if (soundsEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,
                 contentDescription = "Sonido",
-                tint = if (soundsEnabled.value) Color.Green else Color.White
+                tint = if (soundsEnabled.value) Color.Black else Color.White
             )
         }
     }

@@ -1,12 +1,15 @@
 package com.pernasA.multiplayerClocks.android.view
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -63,9 +66,19 @@ fun PlayerCard(
     val isCurrentPlayer = index == viewModel.currentPlayerIndex
     val gameOver = viewModel.gameOver.collectAsState()
 
-    val animatedBorder by animateColorAsState(
-        targetValue = colorPlayer,
-        animationSpec = tween(durationMillis = 500), label = "animatedBorder"
+    val cardHeight by animateDpAsState(
+        targetValue = if (isCurrentPlayer) 180.dp else 140.dp,
+        animationSpec = tween(durationMillis = 300), label = "cardHeight"
+    )
+
+    val animatedBorder by animateDpAsState(
+        targetValue = if (isCurrentPlayer) 8.dp else 5.dp,
+        animationSpec = tween(durationMillis = 300), label = "animatedBorder"
+    )
+
+    val animatedFontSize by animateDpAsState(
+        targetValue = if (isCurrentPlayer) 22.dp else 18.dp,
+        animationSpec = tween(durationMillis = 300), label = "animatedFontSize"
     )
 
     val backgroundColor = if (isCurrentPlayer) player.color.copy(alpha = 0.2f) else player.color.copy(alpha = 0.05f)
@@ -74,7 +87,7 @@ fun PlayerCard(
         modifier = Modifier
             .padding(16.dp)
             .width(200.dp)
-            .height(140.dp)
+            .height(cardHeight)
             .clickable(enabled = !gameOver.value) {
                 if (isCurrentPlayer) {
                     if (isRunning.value) {
@@ -89,7 +102,7 @@ fun PlayerCard(
                 }
             },
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(if (isCurrentPlayer) 8.dp else 5.dp, animatedBorder),
+        border = BorderStroke(animatedBorder, colorPlayer),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Column(
@@ -104,7 +117,7 @@ fun PlayerCard(
                 Text(
                     text = (index + 1).toString(),
                     color = Color.Black,
-                    fontSize = 20.sp,
+                    fontSize = animatedFontSize.value.sp,
                     fontWeight = if (isCurrentPlayer) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.width(40.dp).padding(horizontal = 15.dp)
                 )
@@ -123,16 +136,19 @@ fun PlayerCard(
 
             HorizontalDivider(thickness = 3.dp, color = colorPlayer)
 
-            Text(
-                text = formattedTime,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.Black,
-                fontSize = 28.sp,
-                lineHeight = 28.sp,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = formattedTime,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.Black,
+                    fontSize = 28.sp,
+                    lineHeight = 28.sp
+
+                )
+            }
         }
     }
 }

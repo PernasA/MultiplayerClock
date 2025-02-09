@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import com.pernasA.multiplayerClocks.android.models.Player
 import com.pernasA.multiplayerClocks.android.utils.ButtonPrimary
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import nl.dionsegijn.konfetti.compose.KonfettiView
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.emitter.Emitter
@@ -70,12 +72,17 @@ fun GamePage(viewModel: SharedViewModel) {
     val showGameOverDialog = viewModel.showGameOverDialog.collectAsState()
     val remainingPlayers = viewModel.playersList.collectAsState().value.size
 
+    val showInstructionsDialog = remember { mutableStateOf(true) }
+
     Scaffold( snackbarHost = { SnackbarHost(snackbarHostState) },
     topBar = {
-        GamePageToolbar(viewModel) },
+        GamePageToolbar(viewModel, snackbarHostState, coroutineScope) },
         content = { paddingValues ->
+            if (showInstructionsDialog.value) {
+                InstructionsDialogGamePage(showInstructionsDialog, viewModel)
+            }
+
             if (players.size <= 4) {
-                // Modo de lista normal (uno debajo del otro)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -93,7 +100,6 @@ fun GamePage(viewModel: SharedViewModel) {
                     }
                 }
             } else {
-                // Modo de dos columnas en zig-zag
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
@@ -199,7 +205,11 @@ fun GamePage(viewModel: SharedViewModel) {
 }
 
 @Composable
-fun GamePageToolbar(viewModel: SharedViewModel) {
+fun GamePageToolbar(
+    viewModel: SharedViewModel,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope
+) {
     val showSettingsDialog = remember { mutableStateOf(false) }
     val soundsEnabled = viewModel.getSoundsController().soundsEnabled
 
@@ -222,6 +232,11 @@ fun GamePageToolbar(viewModel: SharedViewModel) {
                     .clickable {
                         viewModel.getSoundsController().playPauseOrPlaySound()
                         viewModel.togglePauseResume()
+                        if (viewModel.gameOver.value) {
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Ya finalizó la partida. Puede reiniciarla o ir al menú principal.")
+                            }
+                        }
                                },
                 contentAlignment = Alignment.Center
             ) {
@@ -376,6 +391,6 @@ fun GamePageToolbarPreview() {
         fun getPlayersList(): List<Player> = listOf(examplePlayer)
         override fun getTypeOfTimer(): Int = 0
     }
-    GamePageToolbar(fakeViewModel)
+    GamePageToolbar(fakeViewModel, SnackbarHostState(), rememberCoroutineScope())
 }
 
