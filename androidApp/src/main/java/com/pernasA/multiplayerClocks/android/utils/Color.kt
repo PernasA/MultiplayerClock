@@ -9,9 +9,4 @@ val ButtonTertiary = Color(0xFF66A3FF) // Azul suave (Botón más claro)
 val ButtonPrimaryContainer = Color(0xFF003C9D) // Azul oscuro vibrante
 val ButtonSecondaryContainer = Color(0xFF004FBB) // Azul intermedio brillante
 
-val PrimaryAccent = Color(0xFFFFA500) // Naranja fuerte para detalles
-
-
-
 val BluePrimary = Color(0xFF0000FF) // Azul brillante
-

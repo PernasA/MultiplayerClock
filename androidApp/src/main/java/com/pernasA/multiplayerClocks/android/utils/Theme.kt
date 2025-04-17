@@ -27,7 +27,7 @@ val LightColorScheme = lightColorScheme(
     tertiary = ButtonTertiary,
     primaryContainer = ButtonPrimaryContainer,
     secondaryContainer = ButtonSecondaryContainer,
-    onSurfaceVariant = Color.Black, // Mejor contraste sobre fondo blanco
+    onSurfaceVariant = Color.Black,
 )
 
 @Composable

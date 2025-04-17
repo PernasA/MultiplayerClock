@@ -32,7 +32,6 @@ import com.pernasA.multiplayerClocks.android.view.ChooseTimerPage
 import com.pernasA.multiplayerClocks.android.view.GamePage
 
 import com.pernasA.multiplayerClocks.android.view.HomePage
-import com.pernasA.multiplayerClocks.android.view.LoadPreviousGamePage
 import com.pernasA.multiplayerClocks.android.view.SelectPlayersPage
 import com.pernasA.multiplayerClocks.android.viewModel.SharedViewModel
 import com.pernasA.multiplayerClocks.android.viewModel.SoundsController
@@ -73,9 +72,9 @@ fun Navigation(
                     snackbarData = data,
                     modifier = Modifier.padding(16.dp),
                     shape = RoundedCornerShape(12.dp),
-                    containerColor = Color(0xFF333333), // Color de fondo personalizado
+                    containerColor = Color(0xFF333333),
                     contentColor = Color.White,
-                    actionColor = Color.Yellow, // Color del botón de acción
+                    actionColor = Color.Yellow,
                 )
             }
                        },
@@ -176,15 +175,6 @@ private fun CreateNavigationHost(
             ChooseTimerPage(
                 goToGamePageOnClick = {
                     navController.navigate(NameOfScreen.GamePageNav.name)
-                },
-                sharedViewModel
-            )
-        }
-
-        composable(route = NameOfScreen.LoadGameNav.name) {
-            LoadPreviousGamePage(
-                chooseTimerOnClick = { ->
-                    navController.navigate(NameOfScreen.ChooseTimerNav.name)
                 },
                 sharedViewModel
             )

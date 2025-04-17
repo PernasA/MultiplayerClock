@@ -106,18 +106,18 @@ fun GamePage(viewModel: SharedViewModel) {
                         .fillMaxSize()
                         .padding(paddingValues),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(32.dp), // Asegura que las tarjetas no tengan espacios adicionales
+                    verticalArrangement = Arrangement.spacedBy(32.dp),
                     contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
                     items(players.size) { index ->
                         val offsetY =
-                            if (index % 2 == 0) 0.dp else 110.dp // Ajusta el valor según el tamaño de la card
+                            if (index % 2 == 0) 0.dp else 110.dp
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(0.9f)
                                 .offset(y = offsetY)
-                                .padding(vertical = 20.dp)// Desplaza la tarjeta en Y sin afectar la estructura
+                                .padding(vertical = 20.dp)
                         ) {
                             PlayerCard(
                                 player = players[index], index = index,
@@ -136,7 +136,7 @@ fun GamePage(viewModel: SharedViewModel) {
                 if (remainingPlayers == 2) {
                     viewModel.getSoundsController().playYouWinGameSound()
                     konfettiController.value = true
-                    // Caso donde solo quedan 2 jugadores y uno pierde
+                    // Case where there are 2 players and one of the players lost
                     AlertDialog(
                         onDismissRequest = {},
                         title = { Text("¡Juego terminado!") },
@@ -154,7 +154,7 @@ fun GamePage(viewModel: SharedViewModel) {
                     )
                 } else {
                     viewModel.getSoundsController().playYouLoseGameSound()
-                    // Caso normal cuando hay más de 2 jugadores
+                    // Normal case when there are more than 2 players and one lose
                     AlertDialog(
                         onDismissRequest = {},
                         title = { Text("¡Tiempo agotado!") },
@@ -224,7 +224,7 @@ fun GamePageToolbar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono Pausa / Reanudar
+            // Icon Pause / Resume
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -249,7 +249,6 @@ fun GamePageToolbar(
 
             VerticalDivider(thickness = 3.dp, color = Color.Black)
 
-            // Icono Configuración
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -293,7 +292,6 @@ private fun ConfigurationModal(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Botón Reiniciar timers
             Button(
                 onClick = {
                     viewModel.getSoundsController().playButtonTickSound()
@@ -307,7 +305,6 @@ private fun ConfigurationModal(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botón Guardar partida
             val localContext = LocalContext.current
             Button(
                 onClick = {
@@ -340,12 +337,12 @@ private fun ConfigurationModal(
                     viewModel.getSoundsController().toggleSound()
                 },
                 modifier = Modifier
-                    .size(60.dp) // Tamaño del icono aumentado
+                    .size(60.dp)
                     .background(
                         color = if (soundsEnabled.value) ButtonPrimary else Color.Gray,
                         shape = CircleShape
                     )
-                    .padding(10.dp) // Espaciado alrededor del icono
+                    .padding(10.dp)
             ) {
                 Icon(
                     imageVector = if (soundsEnabled.value) Icons.AutoMirrored.Default.VolumeUp else Icons.AutoMirrored.Default.VolumeOff,

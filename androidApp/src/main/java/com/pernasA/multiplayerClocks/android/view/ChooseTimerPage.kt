@@ -166,7 +166,7 @@ fun CustomTimePicker(
                     val newTotalSeconds = (newTens * 10) + secondsUnits
                     onTimeChange(totalMinutes, newTotalSeconds)
                 },
-                range = 0..5 // Máximo 5 para las decenas de segundos
+                range = 0..5 // Máximun of 5 for the seconds tens
             )
             DigitSelector(
                 value = secondsUnits,
@@ -267,7 +267,6 @@ fun DigitSelector(
             Text("▲")
         }
 
-        // Valor actual
         Text(
             text = value.toString(),
             style = MaterialTheme.typography.bodyLarge,
@@ -275,7 +274,6 @@ fun DigitSelector(
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
-        // Botón para decrementar
         Button(
             onClick = { if (value > range.first) onValueChange(value - 1) },
             modifier = Modifier.padding(top = 4.dp)

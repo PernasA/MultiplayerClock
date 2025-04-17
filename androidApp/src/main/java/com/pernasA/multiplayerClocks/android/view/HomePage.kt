@@ -162,7 +162,7 @@ fun ColumnTitleAndSubtitle(modifier: Modifier = Modifier) {
                     color = Color.Black
                 )
             )
-            Spacer(modifier = Modifier.height(10.dp)) // Espaciado entre título y subtítulo
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = stringResource(R.string.subtitle_main_page),
                 style = TextStyle(
@@ -211,16 +211,15 @@ fun ToolsButtonsBottom(sharedViewModel: SharedViewModel, soundsEnabled: MutableS
     val context = LocalContext.current
     val shareText = stringResource(id = R.string.button_share_text)
     val whatsappIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://api.whatsapp.com/send?text=$shareText") //TODO: CHECKEAR EL LINK A LA PLAY STORE
+        data = Uri.parse("https://api.whatsapp.com/send?text=$shareText")
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(end = 10.dp, bottom = 10.dp),
-        contentAlignment = Alignment.BottomEnd // Botón de WhatsApp en la parte inferior derecha
+        contentAlignment = Alignment.BottomEnd
     ) {
-        // Botón de WhatsApp
         LargeFloatingActionButton(
             onClick = {
                 sharedViewModel.getSoundsController().playButtonTickSound()
@@ -240,12 +239,11 @@ fun ToolsButtonsBottom(sharedViewModel: SharedViewModel, soundsEnabled: MutableS
         }
     }
 
-    // Botón de sonido a la izquierda
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 10.dp, bottom = 10.dp), // Asegúrate de no solaparse con el botón derecho
-        contentAlignment = Alignment.BottomStart // Botón a la izquierda
+            .padding(start = 10.dp, bottom = 10.dp),
+        contentAlignment = Alignment.BottomStart
     ) {
         LargeFloatingActionButton(
             onClick = {
