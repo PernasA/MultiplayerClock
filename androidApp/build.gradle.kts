@@ -28,29 +28,42 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
-
 dependencies {
     implementation(projects.shared)
+
+    // Compose
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
+    debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.material3)
+    implementation(libs.androidx.material3.android)
+    implementation(libs.material.icons.extended)
+
+    // AndroidX
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.core)
-    implementation(libs.androidx.core)
     implementation(libs.androidx.core)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+
+    // Firebase
     implementation(libs.firebase.crashlytics.buildtools)
-    implementation(libs.androidx.material3.android)
-    debugImplementation(libs.compose.ui.tooling)
+
+    // Otros
     implementation(libs.gson)
-    implementation(libs.material.icons.extended)
     implementation(libs.konfetti)
+
+    //Tests
+    implementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test.v173)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 }

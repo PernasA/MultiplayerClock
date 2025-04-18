@@ -26,7 +26,7 @@ open class SharedViewModel : ViewModel() {
     private lateinit var navController: NavHostController
     private lateinit var soundsController: SoundsController
 
-    private val _playersList = MutableStateFlow<List<Player>>(emptyList())
+    val _playersList = MutableStateFlow<List<Player>>(emptyList())
     val playersList: StateFlow<List<Player>> = _playersList.asStateFlow()
     private var _originalPlayersList = MutableStateFlow<List<Player>>(emptyList())
 
